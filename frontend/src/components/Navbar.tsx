@@ -14,7 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({ restaurant, table, onOpenTableMo
 
   return (
     <header className="sticky top-0 z-40 bg-[#121417]/95 backdrop-blur-md border-b border-amber-900/30 text-white transition-all shadow-md">
-      <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 h-16 flex items-center justify-between">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 h-16 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-inner font-serif font-bold text-lg">

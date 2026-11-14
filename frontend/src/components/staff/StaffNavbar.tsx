@@ -24,7 +24,7 @@ export const StaffNavbar: React.FC<StaffNavbarProps> = ({
 
   return (
     <div className="bg-stone-950 border-b border-amber-900/40 text-white px-3 py-2 text-xs shadow-lg sticky top-0 z-50">
-      <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+      <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
         <div className="flex items-center gap-1.5 shrink-0 pr-2 border-r border-stone-800">
           <div className="w-5 h-5 rounded-md bg-amber-500 text-stone-950 font-bold flex items-center justify-center text-[10px]">
             B

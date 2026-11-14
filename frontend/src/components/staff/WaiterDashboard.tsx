@@ -64,7 +64,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
   );
 
   return (
-    <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-6 animate-fadeIn">
+    <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 animate-fadeIn">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-200">
         <div>
@@ -98,7 +98,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
               Kitchen Dispatch
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {readyOrders.map((o) => (
               <div
                 key={o.id}
@@ -135,7 +135,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
               Bypasses Kitchen Prep
             </span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {waterOrders.map((o) => {
               const floorItems = o.items.filter((it) => it.station === 'WAITER_FLOOR');
               return (
@@ -166,7 +166,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
             <FileText className="w-5 h-5 text-rose-600" />
             <span>Table Bill Requests ({billRequestOrders.length})</span>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
             {billRequestOrders.map((o) => (
               <div
                 key={o.id}
@@ -181,7 +181,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
                   </span>
                 </div>
                 <span className="text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">
-                  Due ${o.total.toFixed(2)}
+                  Due ৳{o.total.toFixed(2)}
                 </span>
               </div>
             ))}
@@ -192,7 +192,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
       {loading && tables.length === 0 ? (
         <div className="text-center py-16 text-stone-500">Loading tables...</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-5">
           {tables.map((t) => {
             const activeOrder = getTableActiveOrder(t.id);
             const isBillRequested = activeOrder?.billRequested;
@@ -256,7 +256,7 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
                     <div className="p-3 bg-white rounded-xl border border-stone-200/80 space-y-2 mb-4 text-xs">
                       <div className="flex justify-between font-semibold text-stone-700">
                         <span>Order #{activeOrder.id.slice(-4)}</span>
-                        <span className="text-amber-800 font-bold">${activeOrder.total.toFixed(2)}</span>
+                        <span className="text-amber-800 font-bold">৳{activeOrder.total.toFixed(2)}</span>
                       </div>
                       <div className="text-[11px] text-stone-500 flex justify-between">
                         <span>Items: {activeOrder.items.reduce((s, it) => s + it.quantity, 0)}</span>

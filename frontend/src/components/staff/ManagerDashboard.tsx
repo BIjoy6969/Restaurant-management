@@ -3,7 +3,6 @@ import { api } from '../../services/api';
 import { MenuItem, DailySalesSummary, Order } from '../../types';
 import { 
   Settings2, 
-  DollarSign, 
   Check, 
   X, 
   RefreshCw, 
@@ -99,7 +98,7 @@ export const ManagerDashboard: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-6 animate-fadeIn">
+    <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 animate-fadeIn">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-200">
         <div>
@@ -164,7 +163,7 @@ export const ManagerDashboard: React.FC = () => {
                 <TrendingUp className="w-4 h-4" />
               </div>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                ${salesSummary?.totalRevenue.toFixed(2) || '0.00'}
+                ৳{salesSummary?.totalRevenue.toFixed(2) || '0.00'}
               </div>
               <span className="text-[11px] text-amber-700/80 font-medium mt-1 block">
                 {salesSummary?.totalOrders || 0} customer orders served
@@ -180,7 +179,7 @@ export const ManagerDashboard: React.FC = () => {
                 {salesSummary?.totalOrders || 0}
               </div>
               <span className="text-[11px] text-stone-400 font-medium mt-1 block">
-                Avg: ${(salesSummary && salesSummary.totalOrders > 0 ? salesSummary.totalRevenue / salesSummary.totalOrders : 0).toFixed(2)} / table
+                Avg: ৳{(salesSummary && salesSummary.totalOrders > 0 ? salesSummary.totalRevenue / salesSummary.totalOrders : 0).toFixed(2)} / table
               </span>
             </div>
 
@@ -190,7 +189,7 @@ export const ManagerDashboard: React.FC = () => {
                 <CreditCard className="w-4 h-4 text-emerald-600" />
               </div>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                ${salesSummary?.cardRevenue.toFixed(2) || '0.00'}
+                ৳{salesSummary?.cardRevenue.toFixed(2) || '0.00'}
               </div>
               <span className="text-[11px] text-emerald-700 font-medium mt-1 block">
                 Electronic settlement
@@ -203,7 +202,7 @@ export const ManagerDashboard: React.FC = () => {
                 <Banknote className="w-4 h-4 text-amber-600" />
               </div>
               <div className="font-serif text-2xl sm:text-3xl font-extrabold text-stone-900">
-                ${salesSummary?.cashRevenue.toFixed(2) || '0.00'}
+                ৳{salesSummary?.cashRevenue.toFixed(2) || '0.00'}
               </div>
               <span className="text-[11px] text-amber-700 font-medium mt-1 block">
                 Register cash drawer
@@ -267,7 +266,7 @@ export const ManagerDashboard: React.FC = () => {
                         <span>{ord.time}</span>
                       </td>
                       <td className="py-3.5 px-4 font-serif font-extrabold text-stone-900">
-                        ${ord.totalAmount.toFixed(2)}
+                        ৳{ord.totalAmount.toFixed(2)}
                       </td>
                       <td className="py-3.5 px-4">
                         <span
@@ -355,8 +354,8 @@ export const ManagerDashboard: React.FC = () => {
                     className="flex items-center gap-1 px-3 py-1 rounded-lg border border-stone-300 hover:border-amber-500 text-xs font-bold text-stone-800"
                     title="Click to edit price"
                   >
-                    <DollarSign className="w-3 h-3 text-amber-600" />
-                    <span>${item.price.toFixed(2)}</span>
+                    <span className="font-bold text-amber-600">৳</span>
+                    <span>৳{item.price.toFixed(2)}</span>
                   </button>
 
                   {/* Stock Toggle */}
@@ -465,7 +464,7 @@ export const ManagerDashboard: React.FC = () => {
                         )}
                       </div>
                       <span className="font-serif font-bold text-stone-900">
-                        ${it.lineTotal.toFixed(2)}
+                        ৳{it.lineTotal.toFixed(2)}
                       </span>
                     </div>
                   ))}
@@ -474,15 +473,15 @@ export const ManagerDashboard: React.FC = () => {
                   <div className="p-3 bg-stone-50 text-xs space-y-1">
                     <div className="flex justify-between text-stone-500">
                       <span>Subtotal</span>
-                      <span>${selectedOrder.subtotal.toFixed(2)}</span>
+                      <span>৳{selectedOrder.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-stone-500">
                       <span>Tax (5%)</span>
-                      <span>${selectedOrder.tax.toFixed(2)}</span>
+                      <span>৳{selectedOrder.tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between font-serif font-extrabold text-stone-900 text-sm pt-1 border-t border-stone-200">
                       <span>Total</span>
-                      <span>${selectedOrder.total.toFixed(2)}</span>
+                      <span>৳{selectedOrder.total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

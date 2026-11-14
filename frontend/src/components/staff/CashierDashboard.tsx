@@ -73,7 +73,7 @@ export const CashierDashboard: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-6 animate-fadeIn">
+    <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 animate-fadeIn">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-stone-200">
         <div>
@@ -94,7 +94,7 @@ export const CashierDashboard: React.FC = () => {
           </div>
           <div className="border-l border-stone-200 pl-4">
             <span className="text-[10px] text-stone-400 font-bold uppercase block">Gross Revenue</span>
-            <span className="text-sm font-bold text-amber-700">${totalRevenue.toFixed(2)}</span>
+            <span className="text-sm font-bold text-amber-700">৳{totalRevenue.toFixed(2)}</span>
           </div>
           <button 
             onClick={fetchOrders} 
@@ -116,9 +116,9 @@ export const CashierDashboard: React.FC = () => {
       {loading && orders.length === 0 ? (
         <div className="text-center py-16 text-stone-500">Loading ledger...</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {/* Active Tables List with Lifecycle Pipelines */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-2 xl:col-span-3 space-y-4">
             <h3 className="font-serif text-lg font-bold text-stone-900 flex items-center justify-between">
               <span>Active Table Tabs ({activeOrders.length})</span>
               <span className="text-xs text-stone-500 font-normal">Real-Time Kitchen & Waiter Stages</span>
@@ -163,7 +163,7 @@ export const CashierDashboard: React.FC = () => {
                           )}
                         </div>
                         <span className="font-serif font-extrabold text-xl text-amber-800">
-                          ${o.total.toFixed(2)}
+                          ৳{o.total.toFixed(2)}
                         </span>
                       </div>
 
@@ -276,7 +276,7 @@ export const CashierDashboard: React.FC = () => {
                             {ord.billSlipType === 'DIGITAL' ? '📱 Digital' : '🖨️ Paper'}
                           </td>
                           <td className="py-2.5 px-3 text-right font-serif font-bold text-stone-900">
-                            ${ord.total.toFixed(2)}
+                            ৳{ord.total.toFixed(2)}
                           </td>
                         </tr>
                       ))
@@ -324,7 +324,7 @@ export const CashierDashboard: React.FC = () => {
                             )}
                           </div>
                         </div>
-                        <span className="font-bold text-stone-900">${it.lineTotal.toFixed(2)}</span>
+                        <span className="font-bold text-stone-900">৳{it.lineTotal.toFixed(2)}</span>
                       </div>
                     ))}
                   </div>
@@ -332,15 +332,15 @@ export const CashierDashboard: React.FC = () => {
                   <div className="pt-3 border-t border-stone-200 space-y-1.5 text-stone-600">
                     <div className="flex justify-between">
                       <span>Subtotal</span>
-                      <span className="font-semibold text-stone-900">${selectedOrder.subtotal.toFixed(2)}</span>
+                      <span className="font-semibold text-stone-900">৳{selectedOrder.subtotal.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Tax (5%)</span>
-                      <span className="font-semibold text-stone-900">${selectedOrder.tax.toFixed(2)}</span>
+                      <span className="font-semibold text-stone-900">৳{selectedOrder.tax.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-base font-bold text-stone-900 pt-2 border-t border-stone-200">
                       <span>Grand Total</span>
-                      <span className="font-serif text-amber-800">${selectedOrder.total.toFixed(2)}</span>
+                      <span className="font-serif text-amber-800">৳{selectedOrder.total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

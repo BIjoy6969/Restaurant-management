@@ -220,7 +220,7 @@ export const App: React.FC = () => {
           />
 
           {/* Main Page Area */}
-          <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 pb-24 sm:pb-12">
+          <main className="flex-1 max-w-7xl 2xl:max-w-[1720px] w-full mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 py-6 pb-24 sm:pb-12">
         {loading ? (
           <div className="min-h-[50vh] flex flex-col items-center justify-center text-center p-8">
             <Loader2 className="w-10 h-10 text-amber-600 animate-spin mb-4" />
@@ -298,7 +298,7 @@ export const App: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-5 sm:gap-6">
                 {filteredItems.map((item) => (
                   <MenuCard
                     key={item.id}

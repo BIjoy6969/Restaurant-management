@@ -25,7 +25,7 @@ export const createApp = (): Express => {
   app.get('/', (req, res) => {
     res.json({
       success: true,
-      message: "L'Aura Bistro Restaurant Management API is running live!",
+      message: "The Break Room Restaurant Management API is running live!",
       health: '/api/health',
       timestamp: new Date().toISOString(),
     });

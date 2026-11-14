@@ -14,18 +14,18 @@ export const Navbar: React.FC<NavbarProps> = ({ restaurant, table, onOpenTableMo
 
   return (
     <header className="sticky top-0 z-40 bg-[#121417]/95 backdrop-blur-md border-b border-amber-900/30 text-white transition-all shadow-md">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div className="max-w-7xl 2xl:max-w-[1720px] mx-auto px-4 sm:px-6 lg:px-8 2xl:px-12 h-16 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-amber-700 flex items-center justify-center text-white shadow-inner font-serif font-bold text-lg">
-            L
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-inner font-serif font-bold text-lg">
+            B
           </div>
           <div>
             <h1 className="font-serif text-lg sm:text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              {restaurant?.name || "L'Aura Bistro"}
+              {restaurant?.name || 'The Break Room'}
             </h1>
             <p className="text-[11px] text-amber-200/70 hidden sm:block tracking-wide">
-              {restaurant?.tagline || 'Artisanal Dining Experience'}
+              {restaurant?.tagline || 'Artisanal Smashed Burgers & Sips • Bogura'}
             </p>
           </div>
         </div>

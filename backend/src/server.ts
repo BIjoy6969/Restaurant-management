@@ -8,7 +8,7 @@ async function bootstrap() {
 
   const app = createApp();
 
-  app.listen(config.port, () => {
+  app.listen(config.port, '0.0.0.0', () => {
     console.log(`=========================================`);
     console.log(` Restaurant QR Ordering Backend running `);
     console.log(` Port: ${config.port}                     `);

@@ -1,6 +1,14 @@
 import { TableMenuResponse, Order, BillRequest, DailySalesSummary, BillSlipType } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const normalizeApiUrl = (url?: string): string => {
+  let u = (url || 'http://localhost:5000/api').trim().replace(/\/+$/, '');
+  if (!u.endsWith('/api')) {
+    u = `${u}/api`;
+  }
+  return u;
+};
+
+const API_BASE_URL = normalizeApiUrl(import.meta.env.VITE_API_URL);
 
 export class ApiError extends Error {
   code: string;

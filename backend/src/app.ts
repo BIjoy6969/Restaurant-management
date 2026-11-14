@@ -31,8 +31,9 @@ export const createApp = (): Express => {
     });
   });
 
-  // Mount API router
+  // Mount API router (both under /api and root / for seamless compatibility)
   app.use('/api', apiRouter);
+  app.use('/', apiRouter);
 
   // 404 Route Handler
   app.use((req, res) => {

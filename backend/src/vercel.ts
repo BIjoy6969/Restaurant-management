@@ -1,5 +1,5 @@
 import { createApp } from './app.js';
-import { connectDatabase } from './database/connection.js';
+import { connectDatabase } from './config/database.js';
 
 const app = createApp();
 let isConnected = false;

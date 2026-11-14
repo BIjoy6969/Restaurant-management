@@ -10,7 +10,7 @@ export const createApp = (): Express => {
   // CORS configuration
   app.use(
     cors({
-      origin: [config.frontendUrl, 'http://localhost:5173', 'http://127.0.0.1:5173', 'http://192.168.10.225:5173'],
+      origin: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
       credentials: true,

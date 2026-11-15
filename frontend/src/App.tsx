@@ -11,7 +11,6 @@ import { CartDrawer } from './components/CartDrawer';
 import { OrderSummaryModal } from './components/OrderSummaryModal';
 import { OrderConfirmationView } from './components/OrderConfirmationView';
 import { ActiveOrderBanner } from './components/ActiveOrderBanner';
-import { FloatingCartBar } from './components/FloatingCartBar';
 import { ErrorState } from './components/ErrorState';
 import { StaffNavbar, AppPortal } from './components/staff/StaffNavbar';
 import { KitchenDashboard } from './components/staff/KitchenDashboard';
@@ -48,20 +47,24 @@ export const App: React.FC = () => {
   // Sync URL when tableId changes
   const handleSelectTable = (newTableId: string) => {
     setTableId(newTableId);
-    setActiveOrder(null);
-    setIsViewingConfirmation(false);
+    const savedOrderId = sessionStorage.getItem(`breakroom_active_order_${newTableId}`);
+    if (!savedOrderId) {
+      setActiveOrder(null);
+      setIsViewingConfirmation(false);
+    }
     const url = new URL(window.location.href);
     url.searchParams.set('table', newTableId);
     window.history.pushState({}, '', url.toString());
   };
 
-  // Reset table session after payment settlement
+  // Reset table session after payment settlement or clicking "Start New Order"
   const handleResetTableSession = () => {
+    sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
     setActiveOrder(null);
     setIsViewingConfirmation(false);
   };
 
-  // Fetch Table Menu
+  // Fetch Table Menu and check only this diner session's active order
   const loadMenu = async () => {
     setLoading(true);
     setError(null);
@@ -69,14 +72,23 @@ export const App: React.FC = () => {
       const data = await api.getTableMenu(tableId);
       setMenuData(data);
 
-      // Check if table already has an active running order
-      try {
-        const activeRes = await api.getActiveTableOrder(tableId);
-        if (activeRes.order) {
-          setActiveOrder(activeRes.order);
+      // Check if THIS specific diner session already has an active running order for this table
+      const savedOrderId = sessionStorage.getItem(`breakroom_active_order_${tableId}`);
+      if (savedOrderId) {
+        try {
+          const res = await api.getOrder(savedOrderId);
+          if (res.order && res.order.status !== 'Cancelled' && res.order.status !== 'Completed') {
+            setActiveOrder(res.order);
+          } else {
+            sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
+            setActiveOrder(null);
+          }
+        } catch {
+          sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
+          setActiveOrder(null);
         }
-      } catch {
-        // Ignore if no active order
+      } else {
+        setActiveOrder(null);
       }
 
       // Fetch all tables for switcher modal
@@ -105,35 +117,44 @@ export const App: React.FC = () => {
     loadMenu();
   }, [tableId]);
 
-  // Real-time sync for active table order
+  // Real-time sync exclusively for THIS diner session's order
   useEffect(() => {
     let isMounted = true;
     const syncActiveOrder = async () => {
       try {
-        const activeRes = await api.getActiveTableOrder(tableId);
+        const savedOrderId = sessionStorage.getItem(`breakroom_active_order_${tableId}`);
+        if (!savedOrderId) {
+          if (isMounted) setActiveOrder(null);
+          return;
+        }
+
+        const res = await api.getOrder(savedOrderId);
         if (isMounted) {
-          const fetchedOrder = activeRes.order;
+          const fetchedOrder = res.order;
           if (fetchedOrder) {
-            setActiveOrder((prev) => {
-              if (
-                prev &&
-                prev.id === fetchedOrder.id &&
-                prev.status === fetchedOrder.status &&
-                prev.updatedAt === fetchedOrder.updatedAt &&
-                prev.items.length === fetchedOrder.items.length
-              ) {
-                return prev;
-              }
-              return fetchedOrder;
-            });
+            if (fetchedOrder.status === 'Cancelled') {
+              sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
+              setActiveOrder(null);
+              setIsViewingConfirmation(false);
+            } else {
+              setActiveOrder((prev) => {
+                if (
+                  prev &&
+                  prev.id === fetchedOrder.id &&
+                  prev.status === fetchedOrder.status &&
+                  prev.updatedAt === fetchedOrder.updatedAt &&
+                  prev.items.length === fetchedOrder.items.length &&
+                  prev.total === fetchedOrder.total &&
+                  prev.billRequested === fetchedOrder.billRequested
+                ) {
+                  return prev;
+                }
+                return fetchedOrder;
+              });
+            }
           } else {
-            setActiveOrder((prev) => {
-              if (prev && prev.status === 'Completed') {
-                setIsViewingConfirmation(false);
-                return null;
-              }
-              return prev;
-            });
+            sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
+            setActiveOrder(null);
           }
         }
       } catch {
@@ -304,17 +325,17 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* Floating Mobile Cart Bar */}
+      {/* Persistent Floating Bill Point & All-In-One Order Summary */}
       {menuData && !isViewingConfirmation && (
-        <FloatingCartBar currency={menuData.restaurant.currency} />
-      )}
-
-      {/* Floating Live Status & Bill Chat-Box Widget */}
-      {activeOrder && !isViewingConfirmation && (
         <ActiveOrderBanner
           activeOrder={activeOrder}
-          restaurant={menuData!.restaurant}
+          restaurant={menuData.restaurant}
+          table={menuData.table}
           onViewOrder={() => setIsViewingConfirmation(true)}
+          onOrderSuccess={(order) => {
+            sessionStorage.setItem(`breakroom_active_order_${tableId}`, order.id);
+            setActiveOrder(order);
+          }}
         />
       )}
         </>
@@ -357,6 +378,7 @@ export const App: React.FC = () => {
           table={menuData.table}
           activeOrder={activeOrder}
           onOrderSuccess={(order) => {
+            sessionStorage.setItem(`breakroom_active_order_${tableId}`, order.id);
             setActiveOrder(order);
             setIsViewingConfirmation(true);
           }}

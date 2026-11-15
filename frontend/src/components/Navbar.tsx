@@ -1,7 +1,6 @@
 import React from 'react';
-import { QrCode, ShoppingBag } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 import { Restaurant, Table } from '../types';
-import { useCart } from '../context/CartContext';
 
 interface NavbarProps {
   restaurant: Restaurant | null;
@@ -10,8 +9,6 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ restaurant, table, onOpenTableModal }) => {
-  const { totalItems, subtotal, setIsCartOpen } = useCart();
-
   return (
     <header className="sticky top-0 z-40 bg-[#121417]/95 backdrop-blur-md border-b border-amber-900/30 text-white transition-all shadow-md">
       <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 h-16 flex items-center justify-between">
@@ -43,26 +40,6 @@ export const Navbar: React.FC<NavbarProps> = ({ restaurant, table, onOpenTableMo
               <QrCode className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
             </button>
           )}
-
-          {/* Cart Button */}
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="relative flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-600 hover:bg-brand-500 active:bg-brand-700 text-white font-medium text-xs sm:text-sm shadow-lg shadow-brand-900/30 transition-all duration-200"
-            aria-label={`View shopping cart with ${totalItems} items`}
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span className="hidden sm:inline font-semibold">Cart</span>
-            {totalItems > 0 && (
-              <>
-                <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-white text-brand-700 rounded-full">
-                  {totalItems}
-                </span>
-                <span className="hidden md:inline text-xs text-amber-100 font-medium border-l border-amber-500/50 pl-2">
-                  ${subtotal.toFixed(2)}
-                </span>
-              </>
-            )}
-          </button>
         </div>
       </div>
     </header>

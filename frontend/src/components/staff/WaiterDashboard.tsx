@@ -39,7 +39,6 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
 
   const handleMarkDelivered = async (orderId: string) => {
     try {
-      // Optimistic update
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, status: 'Delivered' } : o))
       );
@@ -51,12 +50,37 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
     }
   };
 
+  const handleMarkWaterServed = async (orderId: string) => {
+    try {
+      localStorage.setItem(`breakroom_floor_served_${orderId}`, 'true');
+      const targetOrder = orders.find((o) => o.id === orderId);
+      const hasKitchenFood = targetOrder?.items.some(
+        (it) => it.station === 'KITCHEN' || it.station === 'BAR'
+      );
+
+      // If the order has only water / floor items, mark the whole order as Delivered
+      // If it also contains kitchen food, keep order in current stage until chef food is delivered!
+      if (!hasKitchenFood) {
+        setOrders((prev) =>
+          prev.map((o) => (o.id === orderId ? { ...o, status: 'Delivered' } : o))
+        );
+        await api.updateOrderStatus(orderId, 'Delivered');
+      }
+      fetchData();
+    } catch (e) {
+      console.error(e);
+      fetchData();
+    }
+  };
+
   // Urgent lists for top action banners
   const readyOrders = orders.filter((o) => o.status === 'Ready');
   const waterOrders = orders.filter(
     (o) =>
+      o.status !== 'Delivered' &&
       o.status !== 'Completed' &&
       o.status !== 'Cancelled' &&
+      localStorage.getItem(`breakroom_floor_served_${o.id}`) !== 'true' &&
       o.items.some((it) => it.station === 'WAITER_FLOOR')
   );
   const billRequestOrders = orders.filter(
@@ -141,17 +165,32 @@ export const WaiterDashboard: React.FC<{ onSwitchToTable?: (tableId: string) => 
               return (
                 <div
                   key={o.id}
-                  className="p-3 bg-white rounded-xl border border-blue-200 shadow-xs flex items-center justify-between gap-2"
+                  className="p-4 bg-white rounded-2xl border border-sky-300 shadow-sm hover:shadow-md transition-all flex flex-col justify-between gap-3"
                 >
                   <div>
-                    <span className="font-bold text-stone-900 text-xs block">Table {o.tableId}</span>
-                    <span className="text-[11px] text-blue-800 font-medium">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-sky-500 animate-pulse" />
+                        <span className="font-serif font-bold text-stone-900 text-sm">
+                          Table {o.tableId}
+                        </span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">
+                        🧊 Chilled Drink
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-stone-800 leading-snug">
                       {floorItems.map((it) => `${it.quantity}x ${it.itemNameSnapshot}`).join(', ')}
-                    </span>
+                    </p>
                   </div>
-                  <span className="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full whitespace-nowrap">
-                    Serve Chilled
-                  </span>
+
+                  <button
+                    onClick={() => handleMarkWaterServed(o.id)}
+                    className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 active:scale-95 text-white font-bold text-xs shadow-sm shadow-blue-500/20 transition-all cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 text-sky-200" />
+                    <span>সার্ভ সম্পন্ন করুন (Mark Served)</span>
+                  </button>
                 </div>
               );
             })}

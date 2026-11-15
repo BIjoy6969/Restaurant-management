@@ -40,12 +40,6 @@ export class OrderService {
       throw error;
     }
 
-    // Auto-consolidate: If this table already has an active running session, append to it
-    const existingActive = await this.getActiveOrderByTable(table.id);
-    if (existingActive) {
-      return this.addItemsToOrder(existingActive.id, { items: input.items });
-    }
-
     // 2. Fetch Restaurant configuration for tax calculation
     const restaurant = await this.restaurantRepo.getRestaurant();
 

@@ -1,4 +1,4 @@
-import { TableMenuResponse, Order, BillRequest, DailySalesSummary, BillSlipType } from '../types';
+import { TableMenuResponse, Order, BillRequest, DailySalesSummary, BillSlipType, Review, ReviewStats } from '../types';
 
 const normalizeApiUrl = (url?: string): string => {
   let u = (url || 'http://localhost:5000/api').trim().replace(/\/+$/, '');
@@ -128,7 +128,7 @@ export const api = {
 
   async requestBill(
     orderId: string,
-    preference: 'CASH' | 'CARD' | 'SPLIT' = 'CARD',
+    preference: 'CASH' | 'CARD' = 'CARD',
     autoSettle: boolean = true,
     billSlipType: BillSlipType = 'PHYSICAL',
     customerPhone?: string
@@ -153,5 +153,43 @@ export const api = {
       },
     });
     return handleResponse<{ billRequest: BillRequest; order: Order; message: string; tableCleared: boolean }>(res);
+  },
+
+  async submitReview(
+    orderId: string,
+    data: {
+      tableId: string;
+      restaurantId?: string;
+      customerName?: string;
+      customerPhone?: string;
+      rating: number;
+      foodRating?: number;
+      serviceRating?: number;
+      ambianceRating?: number;
+      tags?: string[];
+      comment?: string;
+    }
+  ): Promise<{ review: Review }> {
+    const res = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/review`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return handleResponse<{ review: Review }>(res);
+  },
+
+  async getReviewByOrder(orderId: string): Promise<{ review: Review | null }> {
+    const res = await fetch(`${API_BASE_URL}/orders/${encodeURIComponent(orderId)}/review`);
+    return handleResponse<{ review: Review | null }>(res);
+  },
+
+  async getAllReviews(): Promise<{ reviews: Review[] }> {
+    const res = await fetch(`${API_BASE_URL}/reviews`);
+    return handleResponse<{ reviews: Review[] }>(res);
+  },
+
+  async getReviewStats(): Promise<ReviewStats> {
+    const res = await fetch(`${API_BASE_URL}/reviews/stats`);
+    return handleResponse<ReviewStats>(res);
   },
 };

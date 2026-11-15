@@ -6,15 +6,133 @@
   html {
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+    font-size: 16px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Fluid typography scaling across desktop monitors */
+  @media (min-width: 1024px) {
+    html {
+      font-size: 17px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    html {
+      font-size: 18px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    html {
+      font-size: 19px;
+    }
+  }
+
+  body {
+    background-color: #FAF8F5;
+    color: #1F242B;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.015em;
   }
 }
 
-/* Custom scrollbars for category tabs */
+/* Ensure micro-text classes scale up cleanly on larger displays */
+.text-\[10px\] {
+  font-size: 0.775rem !important;
+  line-height: 1.25 !important;
+}
+
+.text-\[11px\] {
+  font-size: 0.835rem !important;
+  line-height: 1.35 !important;
+}
+
+.text-xs {
+  font-size: 0.875rem !important;
+  line-height: 1.4 !important;
+}
+
+.text-sm {
+  font-size: 0.975rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Luxury visual polish for food cards and dashboards */
+.luxury-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.luxury-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -8px rgba(180, 83, 9, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.05);
+  border-color: rgba(217, 119, 6, 0.45);
+}
+
+/* Ambient glow accent for key action items */
+.glow-amber {
+  box-shadow: 0 0 24px -4px rgba(217, 119, 6, 0.35);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 24px -4px rgba(16, 185, 129, 0.3);
+}
+
+/* Glassmorphism utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Smooth sleek scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3EFEA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D5C9BC;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B8A694;
+}
+
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
+/* Badge pulse animation */
+@keyframes softPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+.animate-softPulse {
+  animation: softPulse 2.5s ease-in-out infinite;
+}

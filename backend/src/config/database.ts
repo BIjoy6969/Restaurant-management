@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { RestaurantModel, TableModel, MenuItemModel } from '../models/index.js';
-import { seedRestaurant, seedTables, seedMenuItems } from '../data/seed.js';
+import { RestaurantModel, TableModel, MenuItemModel, ReviewModel } from '../models/index.js';
+import { seedRestaurant, seedTables, seedMenuItems, seedReviews } from '../data/seed.js';
 
 export async function connectDatabase(): Promise<void> {
   const uri = process.env.MONGODB_URI;
@@ -22,6 +22,13 @@ export async function connectDatabase(): Promise<void> {
 
     await MenuItemModel.deleteMany({});
     await MenuItemModel.insertMany(seedMenuItems);
+
+    // Seed sample reviews if empty
+    const reviewCount = await ReviewModel.countDocuments();
+    if (reviewCount === 0) {
+      await ReviewModel.insertMany(seedReviews);
+      console.log('[Database] Seeded initial customer reviews.');
+    }
 
     console.log('[Database] The Break Room catalog and tables ready in MongoDB Atlas.');
   } catch (error) {

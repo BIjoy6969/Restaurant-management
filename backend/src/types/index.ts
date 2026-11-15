@@ -70,7 +70,7 @@ export interface Order {
   customerPhone?: string;
   billRequested: boolean;
   billSlipType?: BillSlipType;
-  paymentMethod?: 'CASH' | 'CARD' | 'SPLIT';
+  paymentMethod?: 'CASH' | 'CARD';
   settledAt?: string;
   createdAt: string;
   updatedAt: string;
@@ -81,7 +81,7 @@ export interface BillRequest {
   orderId: string;
   tableId: string;
   totalAmount: number;
-  paymentMethodPreference?: 'CASH' | 'CARD' | 'SPLIT';
+  paymentMethodPreference?: 'CASH' | 'CARD';
   billSlipType?: BillSlipType;
   customerPhone?: string;
   status: 'REQUESTED' | 'ACKNOWLEDGED' | 'SETTLED';
@@ -106,4 +106,29 @@ export interface DailySalesSummary {
     customerPhone?: string;
     itemsCount: number;
   }[];
+}
+
+export interface Review {
+  id: string;
+  orderId: string;
+  tableId: string;
+  restaurantId: string;
+  customerName?: string;
+  customerPhone?: string;
+  rating: number; // 1 - 5
+  foodRating: number; // 1 - 5
+  serviceRating: number; // 1 - 5
+  ambianceRating: number; // 1 - 5
+  tags: string[];
+  comment?: string;
+  createdAt: string;
+}
+
+export interface ReviewStats {
+  averageRating: number;
+  totalReviews: number;
+  foodAverage: number;
+  serviceAverage: number;
+  ambianceAverage: number;
+  ratingDistribution: { [key: number]: number };
 }

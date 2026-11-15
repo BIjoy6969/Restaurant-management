@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
-import { Restaurant, Table, MenuCategory, MenuItem, Order, BillRequest, OrderItem } from '../types';
+import { Restaurant, Table, MenuCategory, MenuItem, Order, BillRequest, OrderItem, Review } from '../types';
 
 // Restaurant Schema
 const RestaurantSchema = new Schema<Restaurant & Document>({
@@ -78,11 +78,28 @@ const BillRequestSchema = new Schema<BillRequest & Document>({
   orderId: { type: String, required: true },
   tableId: { type: String, required: true },
   totalAmount: { type: Number, required: true },
-  paymentMethodPreference: { type: String, enum: ['CASH', 'CARD', 'SPLIT'] },
+  paymentMethodPreference: { type: String, enum: ['CASH', 'CARD'], default: 'CARD' },
   billSlipType: { type: String, enum: ['DIGITAL', 'PHYSICAL'], default: 'PHYSICAL' },
   customerPhone: { type: String },
   status: { type: String, enum: ['REQUESTED', 'ACKNOWLEDGED', 'SETTLED'], default: 'REQUESTED' },
   requestedAt: { type: String, required: true }
+}, { timestamps: true });
+
+// Review Schema
+const ReviewSchema = new Schema<Review & Document>({
+  id: { type: String, required: true, unique: true },
+  orderId: { type: String, required: true },
+  tableId: { type: String, required: true },
+  restaurantId: { type: String, required: true },
+  customerName: { type: String, default: 'Guest Diner' },
+  customerPhone: { type: String },
+  rating: { type: Number, required: true, min: 1, max: 5 },
+  foodRating: { type: Number, default: 5, min: 1, max: 5 },
+  serviceRating: { type: Number, default: 5, min: 1, max: 5 },
+  ambianceRating: { type: Number, default: 5, min: 1, max: 5 },
+  tags: [{ type: String }],
+  comment: { type: String },
+  createdAt: { type: String, default: () => new Date().toISOString() }
 }, { timestamps: true });
 
 export const RestaurantModel = mongoose.model<Restaurant & Document>('Restaurant', RestaurantSchema);
@@ -90,3 +107,4 @@ export const TableModel = mongoose.model<Table & Document>('Table', TableSchema)
 export const MenuItemModel = mongoose.model<MenuItem & Document>('MenuItem', MenuItemSchema);
 export const OrderModel = mongoose.model<Order & Document>('Order', OrderSchema);
 export const BillRequestModel = mongoose.model<BillRequest & Document>('BillRequest', BillRequestSchema);
+export const ReviewModel = mongoose.model<Review & Document>('Review', ReviewSchema);

@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   CreditCard,
   Banknote,
-  Users,
   Loader2,
   AlertCircle,
   Sparkles,
@@ -18,7 +17,9 @@ import {
   ChefHat,
   Droplets,
   Check,
+  Star,
 } from 'lucide-react';
+import { Review } from '../types';
 
 interface OrderConfirmationViewProps {
   order: Order;
@@ -77,11 +78,77 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
       ? 'A bill request is active for this order. Waitstaff has been notified.'
       : null
   );
-  const [paymentPreference, setPaymentPreference] = useState<'CARD' | 'CASH' | 'SPLIT'>('CARD');
+  const [paymentPreference, setPaymentPreference] = useState<'CARD' | 'CASH'>('CARD');
   const [billSlipType, setBillSlipType] = useState<BillSlipType>('PHYSICAL');
   const [customerPhone, setCustomerPhone] = useState('');
   const [isRequestingBill, setIsRequestingBill] = useState(false);
   const [billError, setBillError] = useState<string | null>(null);
+
+  // Customer Review State
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [foodRating, setFoodRating] = useState<number>(5);
+  const [serviceRating, setServiceRating] = useState<number>(5);
+  const [ambianceRating, setAmbianceRating] = useState<number>(5);
+  const [selectedReviewTags, setSelectedReviewTags] = useState<string[]>([
+    'Juicy Smashed Burgers 🍔',
+    'Super Fast Service ⚡',
+  ]);
+  const [reviewerName, setReviewerName] = useState<string>('');
+  const [reviewComment, setReviewComment] = useState<string>('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState<boolean>(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState<boolean>(false);
+  const [existingReview, setExistingReview] = useState<Review | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const checkReview = async () => {
+      try {
+        const res = await api.getReviewByOrder(currentOrder.id);
+        if (mounted && res.review) {
+          setExistingReview(res.review);
+          setReviewSubmitted(true);
+        }
+      } catch (e) {
+        // Ignore if no review yet
+      }
+    };
+    checkReview();
+    return () => {
+      mounted = false;
+    };
+  }, [currentOrder.id]);
+
+  const handleToggleReviewTag = (tag: string) => {
+    setSelectedReviewTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingReview) return;
+    setIsSubmittingReview(true);
+    try {
+      const res = await api.submitReview(currentOrder.id, {
+        tableId: currentOrder.tableId,
+        restaurantId: restaurant.id,
+        customerName: reviewerName.trim() || undefined,
+        customerPhone: customerPhone.trim() || undefined,
+        rating: reviewRating,
+        foodRating,
+        serviceRating,
+        ambianceRating,
+        tags: selectedReviewTags,
+        comment: reviewComment.trim(),
+      });
+      setExistingReview(res.review);
+      setReviewSubmitted(true);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
 
   const currency = restaurant.currency || '$';
 
@@ -431,6 +498,274 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
             </div>
           </div>
 
+          {/* ================= CUSTOMER REVIEW & FEEDBACK SECTION ================= */}
+          <div className="pt-4 border-t border-stone-200">
+            {reviewSubmitted || existingReview ? (
+              <div className="p-6 bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/10 border-2 border-amber-400 rounded-3xl shadow-sm animate-fadeIn space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold">
+                      <Star className="w-4 h-4 fill-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-serif text-sm font-bold text-stone-900">
+                        Thank You for Dining With Us!
+                      </h4>
+                      <p className="text-[11px] text-stone-500">
+                        Your review has been shared with The Break Room team.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Review Logged
+                  </span>
+                </div>
+
+                <div className="p-3 bg-white/80 rounded-2xl border border-amber-200/60 flex items-center justify-between">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <Star
+                        key={s}
+                        className={`w-4 h-4 ${
+                          s <= (existingReview?.rating || reviewRating)
+                            ? 'text-amber-500 fill-amber-500'
+                            : 'text-stone-300'
+                        }`}
+                      />
+                    ))}
+                    <span className="text-xs font-bold text-stone-900 ml-2">
+                      {(existingReview?.rating || reviewRating)}.0 / 5.0
+                    </span>
+                  </div>
+                  {existingReview?.tags && existingReview.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {existingReview.tags.slice(0, 2).map((t, idx) => (
+                        <span key={idx} className="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full font-medium">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {(existingReview?.comment || reviewComment) && (
+                  <p className="text-xs text-stone-700 italic bg-white/60 p-3 rounded-xl border border-stone-200/60">
+                    "{existingReview?.comment || reviewComment}"
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="p-5 sm:p-6 bg-white rounded-3xl border border-stone-200 shadow-md animate-fadeIn">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-stone-100">
+                  <div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-600 mb-0.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Guest Feedback</span>
+                    </div>
+                    <h4 className="font-serif text-lg font-bold text-stone-900">
+                      How was your meal at The Break Room?
+                    </h4>
+                    <p className="text-xs text-stone-500">
+                      Before requesting your bill, share your dining experience with us!
+                    </p>
+                  </div>
+                  <div className="text-left sm:text-right">
+                    <span className="text-[10px] font-semibold text-stone-400 block uppercase">Table Session</span>
+                    <span className="text-xs font-bold text-amber-800">Table {currentOrder.tableId}</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  {/* Overall Star Rating */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                      Overall Dining Experience
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setReviewRating(star)}
+                          className="p-1 hover:scale-125 transition-transform cursor-pointer focus:outline-none"
+                          title={`${star} Star${star > 1 ? 's' : ''}`}
+                        >
+                          <Star
+                            className={`w-7 h-7 sm:w-8 sm:h-8 transition-colors ${
+                              star <= reviewRating
+                                ? 'text-amber-500 fill-amber-500 drop-shadow-sm'
+                                : 'text-stone-300 hover:text-amber-300'
+                            }`}
+                          />
+                        </button>
+                      ))}
+                      <span className="ml-2 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900">
+                        {reviewRating === 5
+                          ? '🌟 Outstanding!'
+                          : reviewRating === 4
+                          ? '😊 Very Good'
+                          : reviewRating === 3
+                          ? '🙂 Good'
+                          : reviewRating === 2
+                          ? '😐 Fair'
+                          : '😞 Needs Attention'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Detailed Category Star Breakdown */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-stone-50 rounded-2xl border border-stone-200/80">
+                    {/* Food Taste */}
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-700 block mb-1">
+                        🍔 Food Quality & Taste
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setFoodRating(s)}
+                            className="p-0.5 hover:scale-110 cursor-pointer"
+                          >
+                            <Star
+                              className={`w-4 h-4 ${
+                                s <= foodRating ? 'text-amber-500 fill-amber-500' : 'text-stone-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Waiter Service */}
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-700 block mb-1">
+                        ⚡ Service & Speed
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setServiceRating(s)}
+                            className="p-0.5 hover:scale-110 cursor-pointer"
+                          >
+                            <Star
+                              className={`w-4 h-4 ${
+                                s <= serviceRating ? 'text-amber-500 fill-amber-500' : 'text-stone-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Ambiance */}
+                    <div>
+                      <span className="text-[11px] font-bold text-stone-700 block mb-1">
+                        ✨ Ambiance & Vibe
+                      </span>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setAmbianceRating(s)}
+                            className="p-0.5 hover:scale-110 cursor-pointer"
+                          >
+                            <Star
+                              className={`w-4 h-4 ${
+                                s <= ambianceRating ? 'text-amber-500 fill-amber-500' : 'text-stone-300'
+                              }`}
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Compliment Tags */}
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-2">
+                      What did you enjoy most? (Tap to select)
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        'Juicy Smashed Burgers 🍔',
+                        'Super Fast Service ⚡',
+                        'Friendly Staff 😊',
+                        'Cozy Ambiance ✨',
+                        'Generous Portions 🍟',
+                        'Refreshing Drinks 🍹',
+                        'Crispy Fries 🍟',
+                        'Spotless Clean 🧼',
+                      ].map((tag) => {
+                        const isSelected = selectedReviewTags.includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => handleToggleReviewTag(tag)}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                              isSelected
+                                ? 'bg-amber-600 text-white shadow-xs font-bold'
+                                : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                            }`}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Customer Name & Comment */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-1">
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Your Name (Optional)
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewerName}
+                        onChange={(e) => setReviewerName(e.target.value)}
+                        placeholder="e.g. Tanvir"
+                        className="w-full px-3.5 py-2 rounded-xl border border-stone-300 bg-white text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Comments or Suggestions
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewComment}
+                        onChange={(e) => setReviewComment(e.target.value)}
+                        placeholder="Tell us what you loved or how we can improve..."
+                        className="w-full px-3.5 py-2 rounded-xl border border-stone-300 bg-white text-xs font-medium focus:ring-2 focus:ring-amber-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isSubmittingReview}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white text-xs sm:text-sm font-bold shadow-md transition-all cursor-pointer disabled:opacity-50"
+                  >
+                    {isSubmittingReview ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Star className="w-4 h-4 fill-white" />
+                    )}
+                    <span>{isSubmittingReview ? 'Submitting Review...' : 'Submit Dining Review ⭐'}</span>
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+
           {/* Request Bill / Settlement Section */}
           <div className="pt-4 border-t border-stone-200">
             <h4 className="font-serif text-base font-bold text-stone-900 mb-1 flex items-center gap-2">
@@ -539,42 +874,30 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600 mb-2">
                     Payment Method
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setPaymentPreference('CARD')}
-                      className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                      className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                         paymentPreference === 'CARD'
                           ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
                           : 'bg-white hover:bg-stone-100 text-stone-700 border-stone-300'
                       }`}
                     >
                       <CreditCard className="w-4 h-4 mb-1" />
-                      <span>Credit Card</span>
+                      <span>Credit Card / Digital</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentPreference('CASH')}
-                      className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                      className={`flex flex-col items-center justify-center py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                         paymentPreference === 'CASH'
                           ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
                           : 'bg-white hover:bg-stone-100 text-stone-700 border-stone-300'
                       }`}
                     >
                       <Banknote className="w-4 h-4 mb-1" />
-                      <span>Cash</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentPreference('SPLIT')}
-                      className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                        paymentPreference === 'SPLIT'
-                          ? 'bg-stone-900 text-white border-stone-900 shadow-xs'
-                          : 'bg-white hover:bg-stone-100 text-stone-700 border-stone-300'
-                      }`}
-                    >
-                      <Users className="w-4 h-4 mb-1" />
-                      <span>Split Bill</span>
+                      <span>Cash at Counter / Table</span>
                     </button>
                   </div>
                 </div>

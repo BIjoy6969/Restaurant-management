@@ -1,4 +1,4 @@
-import { Restaurant, Table, MenuCategory, MenuItem, Order, BillRequest } from '../types/index.js';
+import { Restaurant, Table, MenuCategory, MenuItem, Order, BillRequest, Review, ReviewStats } from '../types/index.js';
 
 export interface ITableRepository {
   findById(id: string): Promise<Table | null>;
@@ -33,5 +33,12 @@ export interface IBillRequestRepository {
   findByTableId(tableId: string): Promise<BillRequest[]>;
   findAll(): Promise<BillRequest[]>;
   updateStatus(id: string, status: BillRequest['status']): Promise<BillRequest | null>;
+}
+
+export interface IReviewRepository {
+  create(review: Review): Promise<Review>;
+  findByOrderId(orderId: string): Promise<Review | null>;
+  findAll(): Promise<Review[]>;
+  getStats(): Promise<ReviewStats>;
 }
 

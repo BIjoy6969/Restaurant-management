@@ -1,4 +1,4 @@
-import { Restaurant, Table, MenuCategory, MenuItem } from '../types/index.js';
+import { Restaurant, Table, MenuCategory, MenuItem, Review } from '../types/index.js';
 
 export const seedRestaurant: Restaurant = {
   id: 'rest_breakroom_01',
@@ -319,4 +319,52 @@ export const seedMenuItems: MenuItem[] = [
     calories: 510,
     station: 'KITCHEN',
   },
+];
+
+export const seedReviews: Review[] = [
+  {
+    id: 'rev_sample_01',
+    orderId: 'ord_sample_01',
+    tableId: 'T01',
+    restaurantId: 'rest_breakroom_01',
+    customerName: 'Tanvir Ahmed',
+    customerPhone: '+880 1711 234567',
+    rating: 5,
+    foodRating: 5,
+    serviceRating: 5,
+    ambianceRating: 5,
+    tags: ['Juicy Smashed Burgers 🍔', 'Super Fast Service ⚡', 'Cozy Ambiance ✨'],
+    comment: 'The Double Smashed Beef Burger was outstanding! Patties were crisp on the edges and cheese was melted to perfection. Best burger in Bogura.',
+    createdAt: new Date(Date.now() - 3600000 * 2).toISOString()
+  },
+  {
+    id: 'rev_sample_02',
+    orderId: 'ord_sample_02',
+    tableId: 'T02',
+    restaurantId: 'rest_breakroom_01',
+    customerName: 'Samira Rahman',
+    customerPhone: '+880 1819 876543',
+    rating: 5,
+    foodRating: 5,
+    serviceRating: 4,
+    ambianceRating: 5,
+    tags: ['Generous Portions 🍟', 'Refreshing Drinks 🍹', 'Friendly Staff 😊'],
+    comment: 'Loved the Loaded Meat Box and Sparkling Blue Ocean mocktail. Very cozy vibe for family and friends.',
+    createdAt: new Date(Date.now() - 3600000 * 5).toISOString()
+  },
+  {
+    id: 'rev_sample_03',
+    orderId: 'ord_sample_03',
+    tableId: 'T04',
+    restaurantId: 'rest_breakroom_01',
+    customerName: 'Mahir Faisal',
+    customerPhone: '+880 1912 345678',
+    rating: 5,
+    foodRating: 5,
+    serviceRating: 5,
+    ambianceRating: 5,
+    tags: ['Sizzling Hot 🔥', 'Juicy Smashed Burgers 🍔', 'Great Value 💰'],
+    comment: 'Sizzling beef rice and sizzling brownie both were top notch. Digital QR menu made ordering so seamless!',
+    createdAt: new Date(Date.now() - 3600000 * 9).toISOString()
+  }
 ];

@@ -32,9 +32,9 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
   return (
     <div
       onClick={() => onOpenDetail(item)}
-      className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 ${
+      className={`group relative bg-white rounded-2xl border transition-all duration-300 overflow-hidden cursor-pointer flex flex-col justify-between luxury-card shadow-sm hover:shadow-xl ${
         item.isAvailable
-          ? 'border-stone-200/80 hover:border-amber-400/60'
+          ? 'border-stone-200/90 hover:border-amber-400'
           : 'border-stone-200 opacity-70 bg-stone-50'
       }`}
     >
@@ -45,7 +45,7 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
             src={item.imageUrl}
             alt={item.name}
             onError={() => setImageError(true)}
-            className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 ${
+            className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-108 ${
               !item.isAvailable ? 'grayscale contrast-75' : ''
             }`}
             loading="lazy"
@@ -58,22 +58,22 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
         )}
 
         {/* Gradient Shadow */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent opacity-70" />
 
         {/* Dietary & Status Badges */}
         <div className="absolute top-2.5 left-2.5 flex flex-wrap gap-1.5 z-10">
           {!item.isAvailable && (
-            <span className="px-2.5 py-1 rounded-md bg-rose-600/95 text-white font-bold text-[10px] tracking-wide uppercase shadow-sm">
+            <span className="px-2.5 py-1 rounded-lg bg-rose-600/95 text-white font-bold text-[10px] tracking-wide uppercase shadow-md backdrop-blur-xs">
               Sold Out
             </span>
           )}
           {item.dietary?.map((tag) => (
             <span
               key={tag}
-              className={`px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide backdrop-blur-md shadow-sm ${
+              className={`px-2.5 py-0.5 rounded-lg text-[10px] font-bold tracking-wide backdrop-blur-md shadow-sm ${
                 tag === "Chef's Special" || tag === 'Best Seller'
-                  ? 'bg-amber-500/90 text-stone-950 font-bold'
-                  : 'bg-stone-900/80 text-white'
+                  ? 'bg-amber-500 text-stone-950 font-extrabold shadow-amber-500/20'
+                  : 'bg-stone-950/80 text-white border border-white/20'
               }`}
             >
               {tag}
@@ -82,16 +82,16 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
         </div>
 
         {/* Prep Time / Calories info */}
-        <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between text-[11px] text-white/90 font-medium">
+        <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-xs text-white font-semibold">
           {item.prepTimeMinutes && (
-            <span className="flex items-center gap-1 drop-shadow">
-              <Clock className="w-3 h-3 text-amber-300" />
+            <span className="flex items-center gap-1 drop-shadow-md">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
               {item.prepTimeMinutes} mins
             </span>
           )}
           {item.calories && (
-            <span className="flex items-center gap-1 drop-shadow">
-              <Flame className="w-3 h-3 text-amber-300" />
+            <span className="flex items-center gap-1 drop-shadow-md">
+              <Flame className="w-3.5 h-3.5 text-orange-400" />
               {item.calories} kcal
             </span>
           )}
@@ -101,10 +101,10 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
       {/* Card Content */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900 group-hover:text-amber-700 transition-colors line-clamp-1 mb-1.5">
+          <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900 group-hover:text-amber-800 transition-colors line-clamp-1 mb-1.5">
             {item.name}
           </h3>
-          <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed mb-3">
+          <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed mb-3">
             {item.description}
           </p>
         </div>
@@ -112,8 +112,8 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
         {/* Price & Cart Actions */}
         <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2 mt-auto">
           <div>
-            <span className="text-xs font-semibold text-stone-400 block -mb-0.5">Price</span>
-            <span className="font-serif text-base sm:text-lg font-bold text-stone-900">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400 block -mb-0.5">Price</span>
+            <span className="font-serif text-lg sm:text-xl font-extrabold text-amber-900">
               {currency}{item.price.toFixed(2)}
             </span>
           </div>
@@ -124,31 +124,31 @@ export const MenuCard: React.FC<MenuCardProps> = ({ item, currency, onOpenDetail
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-stone-900 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-semibold shadow-sm transition-all duration-200"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-stone-950 hover:bg-amber-600 active:bg-amber-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Add</span>
+                  <span>Add to Order</span>
                 </button>
               ) : (
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center bg-amber-50 border border-amber-300 rounded-full p-0.5 shadow-sm"
+                  className="flex items-center bg-amber-50 border-2 border-amber-400 rounded-xl p-0.5 shadow-sm"
                 >
                   <button
                     type="button"
                     onClick={handleDecrement}
-                    className="w-7 h-7 rounded-full bg-white hover:bg-amber-100 text-stone-800 flex items-center justify-center transition-colors shadow-xs"
+                    className="w-7 h-7 rounded-lg bg-white hover:bg-amber-100 text-stone-800 flex items-center justify-center transition-colors shadow-xs"
                     aria-label="Decrease quantity"
                   >
                     <Minus className="w-3 h-3 text-amber-900" />
                   </button>
-                  <span className="px-2.5 text-xs font-bold text-amber-950 min-w-[20px] text-center">
+                  <span className="px-2.5 text-xs font-extrabold text-amber-950 min-w-[20px] text-center">
                     {quantity}
                   </span>
                   <button
                     type="button"
                     onClick={handleIncrement}
-                    className="w-7 h-7 rounded-full bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center transition-colors shadow-xs"
+                    className="w-7 h-7 rounded-lg bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center transition-colors shadow-xs"
                     aria-label="Increase quantity"
                   >
                     <Plus className="w-3 h-3" />

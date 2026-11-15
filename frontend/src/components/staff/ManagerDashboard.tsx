@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
-import { MenuItem, DailySalesSummary, Order } from '../../types';
+import { MenuItem, DailySalesSummary, Order, Review, ReviewStats } from '../../types';
 import { 
   Settings2, 
   Check, 
@@ -14,26 +14,34 @@ import {
   Clock, 
   Phone, 
   FileText, 
-  Eye
+  Eye,
+  Star
 } from 'lucide-react';
 
 export const ManagerDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'SALES' | 'MENU'>('SALES');
+  const [activeTab, setActiveTab] = useState<'SALES' | 'MENU' | 'REVIEWS'>('SALES');
   const [salesSummary, setSalesSummary] = useState<DailySalesSummary | null>(null);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewStats, setReviewStats] = useState<ReviewStats | null>(null);
+  const [reviewFilterStar, setReviewFilterStar] = useState<number | 'ALL'>('ALL');
   const [loading, setLoading] = useState(true);
   const [savedNotice, setSavedNotice] = useState<string | null>(null);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [salesRes, menuRes] = await Promise.all([
+      const [salesRes, menuRes, reviewsRes, statsRes] = await Promise.all([
         api.getDailySalesSummary(),
-        api.getTableMenu('T01')
+        api.getTableMenu('T01'),
+        api.getAllReviews().catch(() => ({ reviews: [] })),
+        api.getReviewStats().catch(() => null)
       ]);
       setSalesSummary(salesRes);
       setItems(menuRes.items);
+      setReviews(reviewsRes.reviews);
+      setReviewStats(statsRes);
     } catch (e) {
       console.error(e);
     } finally {
@@ -45,8 +53,14 @@ export const ManagerDashboard: React.FC = () => {
     fetchData();
     const interval = setInterval(async () => {
       try {
-        const salesRes = await api.getDailySalesSummary();
+        const [salesRes, reviewsRes, statsRes] = await Promise.all([
+          api.getDailySalesSummary(),
+          api.getAllReviews().catch(() => ({ reviews: [] })),
+          api.getReviewStats().catch(() => null)
+        ]);
         setSalesSummary(salesRes);
+        setReviews(reviewsRes.reviews);
+        setReviewStats(statsRes);
       } catch (err) {
         console.error(err);
       }
@@ -97,6 +111,11 @@ export const ManagerDashboard: React.FC = () => {
     window.print();
   };
 
+  const filteredReviews = reviews.filter((r) => {
+    if (reviewFilterStar === 'ALL') return true;
+    return Math.round(r.rating) === reviewFilterStar;
+  });
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 animate-fadeIn">
       {/* Top Header */}
@@ -107,7 +126,11 @@ export const ManagerDashboard: React.FC = () => {
             <span>General Manager & Backoffice Console</span>
           </div>
           <h2 className="font-serif text-2xl font-bold text-stone-900">
-            {activeTab === 'SALES' ? 'Daily Sales Analytics & Order Ledger' : 'Menu Catalog & Real-Time Stock Controls'}
+            {activeTab === 'SALES'
+              ? 'Daily Sales Analytics & Order Ledger'
+              : activeTab === 'MENU'
+              ? 'Menu Catalog & Real-Time Stock Controls'
+              : 'Customer Dining Reviews & Guest Experience'}
           </h2>
         </div>
 
@@ -132,6 +155,24 @@ export const ManagerDashboard: React.FC = () => {
             }`}
           >
             Menu Stock Controls
+          </button>
+          <button
+            onClick={() => setActiveTab('REVIEWS')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              activeTab === 'REVIEWS'
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'
+            }`}
+          >
+            <Star className="w-3.5 h-3.5 fill-current text-amber-500" />
+            <span>Customer Reviews</span>
+            {reviewStats && reviewStats.totalReviews > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                activeTab === 'REVIEWS' ? 'bg-amber-800 text-white' : 'bg-amber-100 text-amber-900'
+              }`}>
+                {reviewStats.averageRating}★ ({reviewStats.totalReviews})
+              </span>
+            )}
           </button>
           <button
             onClick={fetchData}
@@ -316,7 +357,7 @@ export const ManagerDashboard: React.FC = () => {
             </table>
           </div>
         </div>
-      ) : (
+      ) : activeTab === 'MENU' ? (
         /* ================= MENU & STOCK TAB ================= */
         <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
           <div className="p-4 bg-stone-50 border-b border-stone-200 flex justify-between items-center text-xs font-bold uppercase tracking-wider text-stone-500">
@@ -374,6 +415,200 @@ export const ManagerDashboard: React.FC = () => {
               </div>
             ))}
           </div>
+        </div>
+      ) : (
+        /* ================= CUSTOMER REVIEWS TAB ================= */
+        <div className="space-y-6">
+          {/* Top Metrics Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Overall Rating Card */}
+            <div className="p-5 bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-500/15 rounded-2xl border border-amber-300 shadow-sm">
+              <div className="flex items-center justify-between text-amber-900 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Overall Guest Score</span>
+                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="font-serif text-3xl font-extrabold text-stone-900">
+                  {reviewStats ? reviewStats.averageRating.toFixed(1) : '5.0'}
+                </span>
+                <span className="text-xs text-stone-500 font-bold">/ 5.0</span>
+              </div>
+              <div className="flex items-center gap-1 mt-1.5">
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <Star
+                    key={s}
+                    className={`w-3.5 h-3.5 ${
+                      s <= Math.round(reviewStats?.averageRating || 5)
+                        ? 'text-amber-500 fill-amber-500'
+                        : 'text-stone-300'
+                    }`}
+                  />
+                ))}
+                <span className="text-[11px] text-amber-900 font-semibold ml-1.5">
+                  ({reviews.length} Verified Reviews)
+                </span>
+              </div>
+            </div>
+
+            {/* Food Rating Card */}
+            <div className="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between text-stone-600 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Food & Taste</span>
+                <span className="text-base">🍔</span>
+              </div>
+              <div className="font-serif text-3xl font-extrabold text-stone-900">
+                {reviewStats ? reviewStats.foodAverage.toFixed(1) : '5.0'}
+                <span className="text-xs text-stone-400 font-normal"> / 5.0</span>
+              </div>
+              <span className="text-[11px] text-emerald-700 font-medium mt-1 block">
+                Smashed Burgers & Loaded Platters
+              </span>
+            </div>
+
+            {/* Service Rating Card */}
+            <div className="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between text-stone-600 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Service & Speed</span>
+                <span className="text-base">⚡</span>
+              </div>
+              <div className="font-serif text-3xl font-extrabold text-stone-900">
+                {reviewStats ? reviewStats.serviceAverage.toFixed(1) : '5.0'}
+                <span className="text-xs text-stone-400 font-normal"> / 5.0</span>
+              </div>
+              <span className="text-[11px] text-amber-700 font-medium mt-1 block">
+                Floor staff hospitality & order delivery
+              </span>
+            </div>
+
+            {/* Ambiance Rating Card */}
+            <div className="p-5 bg-white rounded-2xl border border-stone-200 shadow-sm">
+              <div className="flex items-center justify-between text-stone-600 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider">Ambiance & Cleanliness</span>
+                <span className="text-base">✨</span>
+              </div>
+              <div className="font-serif text-3xl font-extrabold text-stone-900">
+                {reviewStats ? reviewStats.ambianceAverage.toFixed(1) : '5.0'}
+                <span className="text-xs text-stone-400 font-normal"> / 5.0</span>
+              </div>
+              <span className="text-[11px] text-blue-700 font-medium mt-1 block">
+                Jaleswaritola bistro atmosphere & decor
+              </span>
+            </div>
+          </div>
+
+          {/* Reviews Filter Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+            <div>
+              <h3 className="font-serif text-lg font-bold text-stone-900">
+                Real-Time Guest Reviews Feed ({reviews.length})
+              </h3>
+              <p className="text-xs text-stone-500">
+                Submitted directly by customers before bill settlement from their table.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 overflow-x-auto">
+              {(['ALL', 5, 4, 3] as const).map((starVal) => {
+                const count = starVal === 'ALL'
+                  ? reviews.length
+                  : reviews.filter((r) => Math.round(r.rating) === starVal).length;
+                const isActive = reviewFilterStar === starVal;
+                return (
+                  <button
+                    key={starVal}
+                    onClick={() => setReviewFilterStar(starVal)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                      isActive
+                        ? 'bg-stone-900 text-white shadow-xs'
+                        : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-50'
+                    }`}
+                  >
+                    {starVal === 'ALL' ? 'All Reviews' : `${starVal} Stars ⭐`} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Reviews List */}
+          {filteredReviews.length === 0 ? (
+            <div className="p-12 bg-white rounded-2xl border border-stone-200 text-center text-stone-500 text-xs">
+              No customer reviews found matching the selected rating filter.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredReviews.map((rev) => (
+                <div
+                  key={rev.id}
+                  className="bg-white rounded-2xl border border-stone-200 p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-stone-900">
+                            {rev.customerName || 'Guest Diner'}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                            Table {rev.tableId}
+                          </span>
+                        </div>
+                        <span className="text-[11px] text-stone-400">
+                          {new Date(rev.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • {new Date(rev.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-0.5 bg-amber-50 px-2 py-1 rounded-xl border border-amber-200">
+                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        <span className="font-bold text-xs text-amber-900">{rev.rating}.0</span>
+                      </div>
+                    </div>
+
+                    {/* Category Rating Badges */}
+                    <div className="flex flex-wrap gap-2 text-[10px] text-stone-600">
+                      <span className="bg-stone-50 px-2 py-0.5 rounded-md border border-stone-200">
+                        🍔 Food: <strong>{rev.foodRating || rev.rating}★</strong>
+                      </span>
+                      <span className="bg-stone-50 px-2 py-0.5 rounded-md border border-stone-200">
+                        ⚡ Service: <strong>{rev.serviceRating || rev.rating}★</strong>
+                      </span>
+                      <span className="bg-stone-50 px-2 py-0.5 rounded-md border border-stone-200">
+                        ✨ Vibe: <strong>{rev.ambianceRating || rev.rating}★</strong>
+                      </span>
+                    </div>
+
+                    {/* Tags */}
+                    {rev.tags && rev.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {rev.tags.map((tg, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-900 border border-amber-200/60"
+                          >
+                            {tg}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Customer Written Comment */}
+                    {rev.comment && (
+                      <p className="text-xs text-stone-700 italic bg-stone-50/70 p-3 rounded-xl border border-stone-200/50">
+                        "{rev.comment}"
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-stone-100 flex items-center justify-between text-[11px] text-stone-400">
+                    <span className="flex items-center gap-1 text-emerald-700 font-semibold">
+                      <Check className="w-3 h-3 text-emerald-600" /> Verified Dine-In Guest
+                    </span>
+                    <span className="font-mono text-[10px]">Order #{rev.orderId.slice(-4)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

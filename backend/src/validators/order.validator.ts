@@ -32,7 +32,7 @@ export const addItemsToOrderSchema = z.object({
 export type AddItemsToOrderInput = z.infer<typeof addItemsToOrderSchema>;
 
 export const billRequestSchema = z.object({
-  paymentMethodPreference: z.enum(['CASH', 'CARD', 'SPLIT']).optional(),
+  paymentMethodPreference: z.enum(['CASH', 'CARD']).optional(),
   billSlipType: z.enum(['DIGITAL', 'PHYSICAL']).optional(),
   customerPhone: z.string().trim().optional(),
   autoSettle: z.boolean().optional(),

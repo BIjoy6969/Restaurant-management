@@ -251,15 +251,6 @@ export const App: React.FC = () => {
         ) : (
           /* Step 1 - 5: Digital Menu & Ordering Journey */
           <div>
-            {/* If diner has an active running bill, display session banner */}
-            {activeOrder && (
-              <ActiveOrderBanner
-                activeOrder={activeOrder}
-                restaurant={menuData!.restaurant}
-                onViewOrder={() => setIsViewingConfirmation(true)}
-              />
-            )}
-
             {/* Table Welcome Banner */}
             <TableBanner
               restaurant={menuData!.restaurant}
@@ -316,6 +307,15 @@ export const App: React.FC = () => {
       {/* Floating Mobile Cart Bar */}
       {menuData && !isViewingConfirmation && (
         <FloatingCartBar currency={menuData.restaurant.currency} />
+      )}
+
+      {/* Floating Live Status & Bill Chat-Box Widget */}
+      {activeOrder && !isViewingConfirmation && (
+        <ActiveOrderBanner
+          activeOrder={activeOrder}
+          restaurant={menuData!.restaurant}
+          onViewOrder={() => setIsViewingConfirmation(true)}
+        />
       )}
         </>
       )}

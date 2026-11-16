@@ -4,7 +4,11 @@ import { ReviewModel } from '../../models';
 
 export class MongoReviewRepository implements IReviewRepository {
   async create(review: Review): Promise<Review> {
-    await ReviewModel.create(review);
+    await ReviewModel.findOneAndUpdate(
+      { $or: [{ id: review.id }, { orderId: review.orderId }] },
+      { $set: review },
+      { upsert: true, new: true }
+    );
     return review;
   }
 

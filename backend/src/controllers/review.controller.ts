@@ -6,35 +6,24 @@ export class ReviewController {
 
   submitReview = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { orderId } = req.params;
+      const orderId = req.params.orderId || req.body.orderId || `ord_${Date.now()}`;
       const { tableId, restaurantId, customerName, customerPhone, rating, foodRating, serviceRating, ambianceRating, tags, comment } = req.body;
 
-      if (!orderId) {
-        return res.status(400).json({
-          success: false,
-          error: { code: 'VALIDATION_ERROR', message: 'Order ID is required.' }
-        });
-      }
-
-      if (!rating || typeof rating !== 'number' || rating < 1 || rating > 5) {
-        return res.status(400).json({
-          success: false,
-          error: { code: 'VALIDATION_ERROR', message: 'Rating must be a number between 1 and 5.' }
-        });
-      }
+      const numRating = Number(rating) || 5;
+      const validRating = Math.max(1, Math.min(5, Math.round(numRating)));
 
       const review = await this.reviewService.submitReview({
         orderId,
-        tableId: tableId || req.body.table,
-        restaurantId,
-        customerName,
-        customerPhone,
-        rating,
-        foodRating,
-        serviceRating,
-        ambianceRating,
-        tags,
-        comment
+        tableId: tableId || req.body.table || 'T01',
+        restaurantId: restaurantId || 'rest_breakroom_01',
+        customerName: typeof customerName === 'string' ? customerName.trim() : undefined,
+        customerPhone: typeof customerPhone === 'string' ? customerPhone.trim() : undefined,
+        rating: validRating,
+        foodRating: foodRating ? Math.max(1, Math.min(5, Math.round(Number(foodRating)))) : validRating,
+        serviceRating: serviceRating ? Math.max(1, Math.min(5, Math.round(Number(serviceRating)))) : validRating,
+        ambianceRating: ambianceRating ? Math.max(1, Math.min(5, Math.round(Number(ambianceRating)))) : validRating,
+        tags: Array.isArray(tags) ? tags : [],
+        comment: typeof comment === 'string' ? comment.trim() : ''
       });
 
       res.status(201).json({

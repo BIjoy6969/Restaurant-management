@@ -9,6 +9,11 @@ export class InMemoryReviewRepository implements IReviewRepository {
   }
 
   async create(review: Review): Promise<Review> {
+    for (const [id, r] of this.reviews.entries()) {
+      if (r.orderId === review.orderId || id === review.id) {
+        this.reviews.delete(id);
+      }
+    }
     const clone = { ...review };
     this.reviews.set(review.id, clone);
     return { ...clone };

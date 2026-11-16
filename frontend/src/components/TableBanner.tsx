@@ -6,12 +6,14 @@ interface TableBannerProps {
   restaurant: Restaurant;
   table: Table;
   onOpenTableModal: () => void;
+  onChangeTable?: () => void;
 }
 
 export const TableBanner: React.FC<TableBannerProps> = ({
   restaurant,
   table,
   onOpenTableModal,
+  onChangeTable,
 }) => {
   return (
     <div className="relative overflow-hidden bg-gradient-to-r from-stone-950 via-[#1C1814] to-stone-950 text-white rounded-3xl p-6 sm:p-8 mb-6 shadow-2xl border border-amber-500/30">
@@ -44,7 +46,15 @@ export const TableBanner: React.FC<TableBannerProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          {onChangeTable && (
+            <button
+              onClick={onChangeTable}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-stone-900/90 hover:bg-stone-850 active:bg-stone-800 text-stone-200 hover:text-amber-300 text-xs sm:text-sm font-bold border border-stone-700/80 transition-all duration-200 cursor-pointer"
+            >
+              <span>টেবিল পরিবর্তন (Change Table)</span>
+            </button>
+          )}
           <button
             onClick={onOpenTableModal}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 active:from-amber-800 active:to-amber-900 text-white text-xs sm:text-sm font-bold shadow-lg shadow-amber-950/40 border border-amber-400/40 transition-all duration-200 cursor-pointer"

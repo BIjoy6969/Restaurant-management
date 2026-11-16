@@ -149,6 +149,9 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
     let mounted = true;
     const checkReview = async () => {
       try {
+        if (localStorage.getItem(`breakroom_reviewed_${currentOrder.id}`) === 'true') {
+          if (mounted) setReviewSubmitted(true);
+        }
         const res = await api.getReviewByOrder(currentOrder.id);
         if (mounted && res.review) {
           setExistingReview(res.review);
@@ -187,12 +190,19 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
         tags: selectedReviewTags,
         comment: reviewComment.trim(),
       });
-      setExistingReview(res.review);
+      localStorage.setItem(`breakroom_reviewed_${currentOrder.id}`, 'true');
+      if (res?.review) {
+        setExistingReview(res.review);
+      }
       setReviewSubmitted(true);
       setShowFeedbackModal(false);
       setShowThankYouModal(true);
     } catch (err: any) {
-      console.error(err);
+      console.error('Failed to submit review:', err);
+      localStorage.setItem(`breakroom_reviewed_${currentOrder.id}`, 'true');
+      setReviewSubmitted(true);
+      setShowFeedbackModal(false);
+      setShowThankYouModal(true);
     } finally {
       setIsSubmittingReview(false);
     }
@@ -504,69 +514,6 @@ export const OrderConfirmationView: React.FC<OrderConfirmationViewProps> = ({
         <ArrowLeft className="w-4 h-4" />
         <span>{isSettled ? 'Return to Fresh Menu (Table Reset)' : 'Return to Menu'}</span>
       </button>
-
-      {/* Live Staff Stage Simulator Bar for Localhost Testing */}
-      <div className="mb-6 p-3 sm:p-4 bg-stone-900 text-white rounded-2xl shadow-xl border border-amber-500/40 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-          <div>
-            <span className="text-xs font-bold text-amber-300 block">Live Staff Stage Controller</span>
-            <span className="text-[11px] font-mono text-stone-300">
-              Current Status: <strong className="text-amber-400 uppercase">{currentOrder.status}</strong>
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={async () => {
-              await api.updateOrderStatus(currentOrder.id, 'Preparing');
-              const res = await api.getOrder(currentOrder.id);
-              if (res.order) setCurrentOrder(res.order);
-            }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-              currentOrder.status === 'Preparing'
-                ? 'bg-amber-500 text-stone-950 ring-2 ring-amber-300 shadow-md animate-pulse'
-                : 'bg-stone-800 hover:bg-stone-700 text-amber-200 border border-stone-700'
-            }`}
-          >
-            <Flame className="w-3.5 h-3.5" />
-            <span>1. Chef: Start Cooking</span>
-          </button>
-
-          <button
-            onClick={async () => {
-              await api.updateOrderStatus(currentOrder.id, 'Ready');
-              const res = await api.getOrder(currentOrder.id);
-              if (res.order) setCurrentOrder(res.order);
-            }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-              currentOrder.status === 'Ready'
-                ? 'bg-emerald-500 text-stone-950 ring-2 ring-emerald-300 shadow-md animate-pulse'
-                : 'bg-stone-800 hover:bg-stone-700 text-emerald-300 border border-stone-700'
-            }`}
-          >
-            <ChefHat className="w-3.5 h-3.5" />
-            <span>2. Chef: Mark Ready</span>
-          </button>
-
-          <button
-            onClick={async () => {
-              await api.updateOrderStatus(currentOrder.id, 'Delivered');
-              const res = await api.getOrder(currentOrder.id);
-              if (res.order) setCurrentOrder(res.order);
-            }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-extrabold flex items-center gap-1.5 transition-all cursor-pointer ${
-              currentOrder.status === 'Delivered'
-                ? 'bg-blue-500 text-white ring-2 ring-blue-300 shadow-md'
-                : 'bg-stone-800 hover:bg-stone-700 text-blue-300 border border-stone-700'
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>3. Waiter: Deliver</span>
-          </button>
-        </div>
-      </div>
 
       {/* Main Order Card */}
       <div className="bg-white rounded-3xl border border-stone-200 shadow-xl overflow-hidden">

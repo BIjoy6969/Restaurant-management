@@ -104,7 +104,7 @@ export const ManagerDashboard: React.FC = () => {
       } catch (err) {
         console.error('Background sync error:', err);
       }
-    }, 6000);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
@@ -1512,7 +1512,7 @@ export const ManagerDashboard: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-1.5 overflow-x-auto">
-              {(['ALL', 5, 4, 3] as const).map((starVal) => {
+              {(['ALL', 5, 4, 3, 2, 1] as const).map((starVal) => {
                 const count = starVal === 'ALL'
                   ? reviews.length
                   : reviews.filter((r) => Math.round(r.rating) === starVal).length;

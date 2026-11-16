@@ -21,27 +21,22 @@ export class ReviewService {
     comment?: string;
   }): Promise<Review> {
     const existing = await this.reviewRepo.findByOrderId(data.orderId);
-    if (existing) {
-      // Return existing review if already submitted
-      return existing;
-    }
-
     const order = await this.orderRepo.findById(data.orderId);
 
     const review: Review = {
-      id: `rev_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: existing ? existing.id : `rev_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
       orderId: data.orderId,
-      tableId: data.tableId || (order ? order.tableId : 'T01'),
-      restaurantId: data.restaurantId || (order ? order.restaurantId : 'rest_breakroom_01'),
-      customerName: data.customerName?.trim() || 'Guest Diner',
-      customerPhone: data.customerPhone?.trim() || (order ? order.customerPhone : undefined),
+      tableId: data.tableId || (order ? order.tableId : existing?.tableId || 'T01'),
+      restaurantId: data.restaurantId || (order ? order.restaurantId : existing?.restaurantId || 'rest_breakroom_01'),
+      customerName: data.customerName?.trim() || existing?.customerName || 'Guest Diner',
+      customerPhone: data.customerPhone?.trim() || existing?.customerPhone || (order ? order.customerPhone : undefined),
       rating: Math.max(1, Math.min(5, Math.round(data.rating))),
       foodRating: Math.max(1, Math.min(5, Math.round(data.foodRating || data.rating))),
       serviceRating: Math.max(1, Math.min(5, Math.round(data.serviceRating || data.rating))),
       ambianceRating: Math.max(1, Math.min(5, Math.round(data.ambianceRating || data.rating))),
-      tags: Array.isArray(data.tags) ? data.tags : [],
-      comment: data.comment?.trim() || '',
-      createdAt: new Date().toISOString()
+      tags: Array.isArray(data.tags) ? data.tags : existing?.tags || [],
+      comment: data.comment?.trim() || existing?.comment || '',
+      createdAt: existing ? existing.createdAt : new Date().toISOString()
     };
 
     return this.reviewRepo.create(review);

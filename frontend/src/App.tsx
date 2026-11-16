@@ -10,6 +10,7 @@ import { ItemDetailModal } from './components/ItemDetailModal';
 import { CartDrawer } from './components/CartDrawer';
 import { OrderSummaryModal } from './components/OrderSummaryModal';
 import { OrderConfirmationView } from './components/OrderConfirmationView';
+import { TableSelectionScreen } from './components/TableSelectionScreen';
 import { ActiveOrderBanner } from './components/ActiveOrderBanner';
 import { ErrorState } from './components/ErrorState';
 import { StaffNavbar, AppPortal } from './components/staff/StaffNavbar';
@@ -20,7 +21,13 @@ import { ManagerDashboard } from './components/staff/ManagerDashboard';
 import { Utensils, Loader2 } from 'lucide-react';
 
 export const App: React.FC = () => {
-  // Read table parameter from URL (?table=T01)
+  // Track whether the diner has explicitly selected or scanned a table
+  const [hasSelectedTable, setHasSelectedTable] = useState<boolean>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return Boolean(params.get('table'));
+  });
+
+  // Read table parameter from URL (?table=T01) or default to 'T01'
   const [tableId, setTableId] = useState<string>(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('table') || 'T01';
@@ -47,6 +54,7 @@ export const App: React.FC = () => {
   // Sync URL when tableId changes
   const handleSelectTable = (newTableId: string) => {
     setTableId(newTableId);
+    setHasSelectedTable(true);
     const savedOrderId = sessionStorage.getItem(`breakroom_active_order_${newTableId}`);
     if (!savedOrderId) {
       setActiveOrder(null);
@@ -57,11 +65,20 @@ export const App: React.FC = () => {
     window.history.pushState({}, '', url.toString());
   };
 
+  // Return to Table Selection screen
+  const handleReturnToTableSelection = () => {
+    setHasSelectedTable(false);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('table');
+    window.history.pushState({}, '', url.toString());
+  };
+
   // Reset table session after payment settlement or clicking "Start New Order"
   const handleResetTableSession = () => {
     sessionStorage.removeItem(`breakroom_active_order_${tableId}`);
     setActiveOrder(null);
     setIsViewingConfirmation(false);
+    handleReturnToTableSelection();
   };
 
   // Fetch Table Menu and check only this diner session's active order
@@ -173,7 +190,13 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
-      setTableId(params.get('table') || 'T01');
+      const urlTable = params.get('table');
+      if (urlTable) {
+        setTableId(urlTable);
+        setHasSelectedTable(true);
+      } else {
+        setHasSelectedTable(false);
+      }
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
@@ -231,6 +254,13 @@ export const App: React.FC = () => {
         <CashierDashboard />
       ) : currentPortal === 'manager' ? (
         <ManagerDashboard />
+      ) : !hasSelectedTable ? (
+        <TableSelectionScreen
+          restaurant={menuData?.restaurant || null}
+          tables={allTables}
+          onSelectTable={handleSelectTable}
+          onOpenQRScanner={() => setIsTableModalOpen(true)}
+        />
       ) : (
         <>
           {/* Top Customer Navigation */}
@@ -238,6 +268,7 @@ export const App: React.FC = () => {
             restaurant={menuData?.restaurant || null}
             table={menuData?.table || null}
             onOpenTableModal={() => setIsTableModalOpen(true)}
+            onChangeTable={handleReturnToTableSelection}
           />
 
           {/* Main Page Area */}
@@ -277,6 +308,7 @@ export const App: React.FC = () => {
               restaurant={menuData!.restaurant}
               table={menuData!.table}
               onOpenTableModal={() => setIsTableModalOpen(true)}
+              onChangeTable={handleReturnToTableSelection}
             />
 
             {/* Sticky Category Tabs & Search Bar */}
